@@ -48,3 +48,7 @@ int main(int argc, char* argv[]) {
 ```
 ________________________
 
+### 4. Примеры вывода. <br> ###
+
+<img width="573" alt="Снимок экрана 2023-02-02 в 12 27 37" src="https://user-images.githubusercontent.com/114473740/216285314-efc03bd7-a3d9-49c0-9798-f5b3b9a4f6fa.png">
+

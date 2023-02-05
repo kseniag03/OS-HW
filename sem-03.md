@@ -104,9 +104,9 @@ ________________________
 
 ### 5. Примеры вывода. <br> ###
 
-1. На MacOS, 1-я версия <br>
-<img width="573" alt="Снимок экрана 2023-02-02 в 12 27 37" src="https://user-images.githubusercontent.com/114473740/216285314-efc03bd7-a3d9-49c0-9798-f5b3b9a4f6fa.png">
-2. Virtual Ubuntu, улучшенная версия <br>
+На MacOS, 1-я версия <br>
+<img width="573" alt="Снимок экрана 2023-02-02 в 12 27 37" src="https://user-images.githubusercontent.com/114473740/216285314-efc03bd7-a3d9-49c0-9798-f5b3b9a4f6fa.png"> <br>
+Virtual Ubuntu, улучшенная версия <br>
 ![image](https://user-images.githubusercontent.com/114473740/216815792-0833ba99-ddf1-4b17-a9e3-f6a3c3bc01fc.png)
 
 

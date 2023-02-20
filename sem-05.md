@@ -104,7 +104,10 @@ ________________________
 
 ### 4. Примеры вывода. <br> ###
 
-Virtual Ubuntu <br>
+MacOS <br>
+<img width="600" alt="image" src="https://user-images.githubusercontent.com/114473740/220061988-d260a0e6-1165-4bb3-bdff-6c438bdb1612.png">
 
+Virtual Ubuntu <br>
+// пока не протестилось...
 
 

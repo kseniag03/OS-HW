@@ -36,14 +36,20 @@ int main(int argc, char *argv[]) {
     fd = open(fifo, O_WRONLY);
     char *message = "Hello from process 1!";
     write(fd, message, strlen(message) + 1);
-    close(fd);
+    if(close(fd) < 0){
+      printf("Writer: Can\'t close FIFO\n"); 
+      exit(-1);
+    }
 
     // open, read, and close the file
     fd = open(fifo, O_RDONLY);
     char buffer[100];
     read(fd, buffer, sizeof(buffer));
     printf("Received from process 2: %s\n", buffer);
-    close(fd);
+    if(close(fd) < 0){
+      printf("Writer: Can\'t close FIFO\n"); 
+      exit(-1);
+    }
 
     // remove the FIFO
     unlink(fifo);
@@ -76,13 +82,19 @@ int main(int argc, char *argv[]) {
     char buffer[100];
     read(fd, buffer, sizeof(buffer));
     printf("Received from process 1: %s\n", buffer);
-    close(fd);
+    if(close(fd) < 0){
+      printf("Writer: Can\'t close FIFO\n"); 
+      exit(-1);
+    }
 
     // open, write, and close the file
     fd = open(fifo, O_WRONLY);
     char *message = "Hello from process 2!";
     write(fd, message, strlen(message) + 1);
-    close(fd);
+    if(close(fd) < 0){
+      printf("Writer: Can\'t close FIFO\n"); 
+      exit(-1);
+    }
 
     return 0;
 }

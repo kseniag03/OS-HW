@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     // open, write, and close the file
     fd = open(fifo, O_WRONLY);
     char *message = "Hello from process 2!";
-    write(fd, message, strlen(message)+1);
+    write(fd, message, strlen(message) + 1);
     close(fd);
 
     return 0;

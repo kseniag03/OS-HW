@@ -12,103 +12,144 @@ ________________________
 #1. Client
 
 ```с
-// shmem-gen.c
-// write a random number between 0 and 999 to the shm every 1 second
+// shared-memory-client.c
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/shm.h>
+#include <string.h>
 #include <stdlib.h>
-#include <time.h>
-#include <error.h>
+#include "message.h"
 
-int main() {
-    int shm_id;         // идентификатор разделяемой памяти
-    int *share;         // адрес сообщения в разделяемой памяти
-    key_t key = 0x2FF;  // ключ System V IPC
+void sys_err (char *msg) {
+  puts (msg);
+  exit (1);
+}
 
-    // получение доступа к сегменту разделяемой памяти
-    shm_id = shmget (key, getpagesize(), 0666 | IPC_CREAT);
-    if (shm_id < 0) {
-        perror("client: can not get shared memory segment");
-        exit(1);
+int main () {
+  int shmid;            // идентификатор разделяемой памяти
+  message_t *share;     // адрес сообщения в разделяемой памяти
+  int num;   // число
+
+  // получение доступа к сегменту разделяемой памяти
+  if ((shmid = shmget (SHM_ID, sizeof (message_t), 0)) < 0) {
+    sys_err ("client: can not get shared memory segment");
+  }
+
+  // получение адреса сегмента
+  if ((share = (message_t *) shmat (shmid, 0, 0)) == NULL) {
+    sys_err ("client: shared memory attach error");
+  }
+
+  // Организация передаци сообщений
+  while (1) {
+    num = random() % 1000;
+    share->value = num;
+    if (share->value > 0) {
+      // Не прощаемся.
+      // Записать сообщение о передаче строки
+      share->type = MSG_TYPE_STRING;
+      printf("write a random number %d\n", num);
+      sleep(5);
+    } else {
+      // Записать сообщение о завершении обмена
+      share->type = MSG_TYPE_FINISH;
     }
-    printf("shm_id = %d\n", shm_id);
-
-    // получение адреса сегмента
-    // подключение сегмента к адресному пространству процесса
-    share = (int *)shmat(shm_id, 0, 0);
-    if (share == NULL) {
-        perror("client: shared memory attach error");
-        exit(2);
+    if (share->type == MSG_TYPE_FINISH) {
+      break;
     }
-    printf("share = %p\n", share);
-
-    int num;
-    srand(time(NULL));
-    while (1) {
-        num = random() % 1000;
-        *share = num;
-        printf("write a random number %d\n", num);
-        sleep(1);
-    }
-    
-    return 0;
+  }
+  // Окончание цикла передачи сообщений
+  shmdt (share);  // отсоединить сегмент разделяемой памяти
+  exit (0);
 }
 ```
 
 #2. Server
 
 ```с
-// shmem-out.c
-// read from the shm every 1 second
-#include<stdio.h>
-#include<unistd.h>
-#include<sys/shm.h>
-#include<stdlib.h>
-#include<error.h>
+// shared-memory-server.c
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "message.h"
 
-int main() {
-    int shm_id;         // идентификатор разделяемой памяти
-    int *share;         // адрес сообщения в разделяемой памяти
-    key_t key = 0x2FF;  // ключ System V IPC
-
-    // получение доступа к сегменту разделяемой памяти
-    shm_id = shmget (key, getpagesize(), 0666 | IPC_CREAT);
-    if (shm_id == -1) {
-        perror("server: can not get shared memory segment");
-        exit(1);
-    }
-
-    // получение адреса сегмента
-    share = (int *)shmat(shm_id, 0, 0);
-    if (share == NULL) {
-        perror("server: shared memory attach error");
-        exit(2);
-    }
-
-    while (1) {
-        sleep(1);
-        printf("%d\n", *share);
-    }
-
-    // удаление сегмента разделяемой памяти
-    shmdt (share);
-    if (shmctl (shmid, IPC_RMID, (struct shmid_ds *) 0) < 0) {
-        sys_err ("eraser: shared memory remove error");
-    }
-    // Сообщение об удалении сегмента разделяемой памяти
-    printf("eraser: shared memory using key = %x deleted\n", SHM_ID);
-
-    return 0;
+void sys_err (char *msg) {
+  puts (msg);
+  exit (1);
 }
+
+int main () {
+  int shmid;             // идентификатор разделяемой памяти
+  message_t *share;      // адрес сообщения в разделяемой памяти
+//  char s[MAX_STRING];
+
+  // создание сегмента разделяемой памяти
+  if ((shmid = shmget (SHM_ID, sizeof (message_t), PERMS | IPC_CREAT)) < 0) {
+    sys_err ("server: can not create shared memory segment");
+  }
+  printf("Shared memory %d created\n", SHM_ID);
+
+  // подключение сегмента к адресному пространству процесса
+  if ((share = (message_t *) shmat (shmid, 0, 0)) == NULL) {
+    sys_err ("server: shared memory attach error");
+  }
+  printf("Shared memory pointer = %p\n", share);
+
+  share->type = MSG_TYPE_EMPTY;
+  while (1) {
+    if (share->type != MSG_TYPE_EMPTY) {
+      // обработка сообщения
+      if (share->type == MSG_TYPE_STRING) {
+        printf ("%d\n", share->value);
+      } else if (share->type == MSG_TYPE_FINISH) {
+        break;
+      }
+      share->type = MSG_TYPE_EMPTY; // сообщение обработано
+    }
+  }
+
+  // удаление сегмента разделяемой памяти
+  shmdt (share);
+  if (shmctl (shmid, IPC_RMID, (struct shmid_ds *) 0) < 0) {
+    sys_err ("server: shared memory remove error");
+  }
+  exit (0);
+}
+```
+
+#3. Message
+
+```с
+// message.h
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <stdio.h>
+
+#define SHM_ID  0x777     // ключ разделяемой памяти
+#define PERMS   0666      // права доступа
+
+// коды сообщений
+#define MSG_TYPE_EMPTY  0     // сообщение о завершении обмена при пустой строке
+#define MSG_TYPE_STRING 1     // сообщение о передаче строки
+#define MSG_TYPE_FINISH 2     // сообщение о том, что пора завершать обмен
+
+// #define MAX_STRING      120   // максимальная длина текстового сообщения
+
+// структура сообщения, помещаемого в разделяемую память
+typedef struct {
+  int type;
+  int value;
+  //char string [MAX_STRING];
+} message_t;
+
 ```
 ________________________
 
 ### 4. Примеры вывода. <br> ###
 
-MacOS <br>
-
-
 Virtual Ubuntu <br>
+![image](https://user-images.githubusercontent.com/114473740/221436302-0a56083a-f558-4b61-b775-4fb521b32c0f.png)
+![image](https://user-images.githubusercontent.com/114473740/221436353-e184940d-6355-46e4-9fe6-983b2d01a53c.png)
+![image](https://user-images.githubusercontent.com/114473740/221436405-3ab3d722-a04e-495e-9c71-c10d26526040.png)
 
 

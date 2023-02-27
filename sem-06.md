@@ -45,7 +45,7 @@ int main () {
     if (share->value > 0) {
       // Не прощаемся.
       // Записать сообщение о передаче строки
-      share->type = MSG_TYPE_STRING;
+      share->type = MSG_TYPE_INT;
       printf("write a random number %d\n", num);
       sleep(5);
     } else {
@@ -79,7 +79,6 @@ void sys_err (char *msg) {
 int main () {
   int shmid;             // идентификатор разделяемой памяти
   message_t *share;      // адрес сообщения в разделяемой памяти
-//  char s[MAX_STRING];
 
   // создание сегмента разделяемой памяти
   if ((shmid = shmget (SHM_ID, sizeof (message_t), PERMS | IPC_CREAT)) < 0) {
@@ -97,7 +96,7 @@ int main () {
   while (1) {
     if (share->type != MSG_TYPE_EMPTY) {
       // обработка сообщения
-      if (share->type == MSG_TYPE_STRING) {
+      if (share->type == MSG_TYPE_INT) {
         printf ("%d\n", share->value);
       } else if (share->type == MSG_TYPE_FINISH) {
         break;
@@ -130,16 +129,13 @@ int main () {
 
 // коды сообщений
 #define MSG_TYPE_EMPTY  0     // сообщение о завершении обмена при пустой строке
-#define MSG_TYPE_STRING 1     // сообщение о передаче строки
+#define MSG_TYPE_INT 1        // сообщение о передаче строки
 #define MSG_TYPE_FINISH 2     // сообщение о том, что пора завершать обмен
-
-// #define MAX_STRING      120   // максимальная длина текстового сообщения
 
 // структура сообщения, помещаемого в разделяемую память
 typedef struct {
   int type;
   int value;
-  //char string [MAX_STRING];
 } message_t;
 
 ```

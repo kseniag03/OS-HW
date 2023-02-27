@@ -31,7 +31,7 @@ int main () {
     if (share->value > 0) {
       // Не прощаемся.
       // Записать сообщение о передаче строки
-      share->type = MSG_TYPE_STRING;
+      share->type = MSG_TYPE_INT;
       printf("write a random number %d\n", num);
       sleep(5);
     } else {

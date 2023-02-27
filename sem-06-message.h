@@ -10,14 +10,11 @@
 
 // коды сообщений
 #define MSG_TYPE_EMPTY  0     // сообщение о завершении обмена при пустой строке
-#define MSG_TYPE_STRING 1     // сообщение о передаче строки
+#define MSG_TYPE_INT 1        // сообщение о передаче строки
 #define MSG_TYPE_FINISH 2     // сообщение о том, что пора завершать обмен
-
-// #define MAX_STRING      120   // максимальная длина текстового сообщения
 
 // структура сообщения, помещаемого в разделяемую память
 typedef struct {
   int type;
   int value;
-  //char string [MAX_STRING];
 } message_t;

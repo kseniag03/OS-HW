@@ -46,14 +46,14 @@ int main(int argc, char *argv[]) {
     int i = 0;
     int cnt = 0;
     while (i < loop_count) {
-	      if (cnt > 10) {
-	          *ptr = -3;
+	if (cnt > 10) {
+	    *ptr = -3;
             break;
         }
-	      int num = *ptr;
+	int num = *ptr;
         if (num == -1) {
             usleep(1000);
-	          cnt++;
+	    cnt++;
             continue;
         } else if (num == -2) {
             break;
@@ -61,10 +61,10 @@ int main(int argc, char *argv[]) {
         printf("Received number: %d\n", num);
         *ptr = -1;
         i++;
-	      cnt = 0;
+	cnt = 0;
     }
     if (*ptr != -2) {
-	      *ptr = -3;
+	*ptr = -3;
     }
 
     // ожидание завершения работы клиента

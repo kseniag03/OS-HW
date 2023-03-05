@@ -9,7 +9,7 @@ ________________________
 
 ### 3. Код с комментариями. <br> ###
 
-В аргументах командной строки передаётся конечное число итераций цикла. Более прямолинейным способом было бы определение кол-ва итераций за одинаковую константу в обоих программах.
+В аргументах командной строки передаётся конечное число итераций цикла. Более прямолинейным способом было бы определение кол-ва итераций за одинаковую константу в обоих программах. Испрользуем доп. значения внутри переменной разделяемой памяти (-1, -2 и -3), чтобы понять, что нужно выполнять программе: -1 означает, что нужно ожидать, пока запишется другое значение, -2 -- клиент завершил работу, пусть завершит и сервер, -3 -- сервер завершил работу, пусть клиент остановится.
 
 #1. Client
 
@@ -29,6 +29,7 @@ const char* shar_object = "posix-shar";
 
 int main(int argc, char *argv[]) {
     int loop_count;
+    // проверка на корректный формат входных данных
     if (argc < 2) {
         printf("No arguments\n");
         exit(1);
@@ -36,31 +37,32 @@ int main(int argc, char *argv[]) {
         loop_count = atoi(argv[1]);
     }
 
-    // Create and initialize the shared memory object
+    // создание и инициализация объекта общей памяти
     int shm_id = shm_open(shar_object, O_CREAT | O_RDWR, 0666);
     if (shm_id == -1) {
         perror("shm_open error");
-        exit(EXIT_FAILURE);
+        exit(1);
     } else {
     	printf("Object is open: name = %s, id = 0x%x\n", shar_object, shm_id);
     }
 
-    // Задание размера объекта памяти
+    // задание размера объекта памяти
     if (ftruncate(shm_id, SHARED_MEM_SIZE) == -1) {
         perror("ftruncate error");
         exit(1);
     }
 
+    // получение доступа к памяти
     int *ptr = mmap(0, SHARED_MEM_SIZE, PROT_WRITE|PROT_READ, MAP_SHARED, shm_id, 0);
     if (ptr == (int*)-1) {
         perror("mmap error");
         exit(1);
     }
 
-    // Seed the random number generator
+    // активация генератора случайных чисел
     srand(time(NULL));
 
-    // Write random numbers to the shared memory
+    // запись случайных чисел в разделяемую память
     int i = 0;
     *ptr = -1;
     while (i < loop_count && *ptr != -3) {
@@ -79,7 +81,7 @@ int main(int argc, char *argv[]) {
         i++;
     }
 
-    // Signal the server to terminate
+    // сигнал серверу о прекращении
     *ptr = -2;
 
     // удаление разделяемой памяти
@@ -110,6 +112,7 @@ const char* shar_object = "posix-shar";
 
 int main(int argc, char *argv[]) {
     int loop_count;
+    // проверка на корректный формат входных данных
     if (argc < 2) {
         printf("No arguments\n");
         exit(1);
@@ -117,7 +120,7 @@ int main(int argc, char *argv[]) {
         loop_count = atoi(argv[1]);
     }
 
-    // Create and initialize the shared memory object
+    // создание и инициализация объекта общей памяти
     int shm_id = shm_open(shar_object, O_CREAT | O_RDWR, 0666);
     if (shm_id == -1) {
         perror("shm_open error");
@@ -126,19 +129,20 @@ int main(int argc, char *argv[]) {
     	printf("Object is open: name = %s, id = 0x%x\n", shar_object, shm_id);
     }
 
-    // Задание размера объекта памяти
+    // задание размера объекта памяти
     if (ftruncate(shm_id, SHARED_MEM_SIZE) == -1) {
         perror("ftruncate error");
         exit(1);
     }
 
+    // получение доступа к памяти
     int *ptr = mmap(0, SHARED_MEM_SIZE, PROT_WRITE|PROT_READ, MAP_SHARED, shm_id, 0);
     if (ptr == (int*)-1) {
         perror("mmap error");
         exit(1);
     }
 
-    // Read random numbers from the shared memory and output them
+    // чтение случайных чисел из общей памяти и их вывод
     int i = 0;
     int cnt = 0;
     while (i < loop_count) {
@@ -163,7 +167,7 @@ int main(int argc, char *argv[]) {
 	*ptr = -3;
     }
 
-    // Wait for the client to terminate
+    // ожидание завершения работы клиента
     while (*ptr != -2) {
         usleep(1000);
     }

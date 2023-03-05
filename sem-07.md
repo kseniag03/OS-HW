@@ -9,6 +9,8 @@ ________________________
 
 ### 3. Код с комментариями. <br> ###
 
+В аргументах командной строки передаётся конечное число итераций цикла. Более прямолинейным способом было бы определение кол-ва итераций за одинаковую константу в обоих программах.
+
 #1. Client
 
 ```с
@@ -56,16 +58,14 @@ int main(int argc, char *argv[]) {
     // Write random numbers to the shared memory
     int i = 0;
     while (i < loop_count) {
-	printf("#client 1");
-	if (*ptr == -2) {
+	if (*ptr == -3) {
             break;
         }
         int random_num = rand() % 1000;
-        while (*ptr != -1 || *ptr != -2) {
-	    printf("#client 2");
+        while (*ptr != -1 && *ptr != -3) {
             usleep(1000);
         }
-	if (*ptr == -2) {
+	if (*ptr == -3) {
             break;
         }
         *ptr = random_num;
@@ -131,9 +131,8 @@ int main(int argc, char *argv[]) {
     int i = 0;
     int cnt = 0;
     while (i < loop_count) {
-	printf("#server 1");
 	if (cnt > 3) {
-	    *ptr = -2;
+	    *ptr = -3;
             break;
         }
 	int num = *ptr;
@@ -149,10 +148,13 @@ int main(int argc, char *argv[]) {
         i++;
 	cnt = 0;
     }
-    *ptr = -2;
+    if (*ptr != -2) {
+	*ptr = -3;
+    }
 
     // Wait for the client to terminate
     while (*ptr != -2) {
+	printf("#server 2");
         usleep(1000);
     }
 
@@ -176,6 +178,7 @@ ________________________
 ### 4. Примеры вывода. <br> ###
 
 Virtual Ubuntu <br>
+![image](https://user-images.githubusercontent.com/114473740/222986764-c657bf53-2a21-4a5b-9271-51e4b0823986.png)
 
 
 

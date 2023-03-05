@@ -25,31 +25,36 @@ ________________________
 
 #define SHARED_MEM_SIZE sizeof(int)
 
+const char* shar_object = "posix-shar";
+
 int main(int argc, char *argv[]) {
     int loop_count;
     if (argc < 2) {
-        printf("Usage: %s <loop_count>\n", argv[0]);
-        exit(EXIT_FAILURE);
+        printf("No arguments\n");
+        exit(1);
     } else {
         loop_count = atoi(argv[1]);
     }
 
     // Create and initialize the shared memory object
-    int shm_fd = shm_open("/my_shared_mem", O_CREAT | O_RDWR, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
+    int shm_id = shm_open(shar_object, O_CREAT | O_RDWR, 0666);
+    if (shm_id == -1) {
+        perror("shm_open error");
         exit(EXIT_FAILURE);
+    } else {
+    	printf("Object is open: name = %s, id = 0x%x\n", shar_object, shm_id);
     }
 
-    if (ftruncate(shm_fd, SHARED_MEM_SIZE) == -1) {
-        perror("ftruncate");
-        exit(EXIT_FAILURE);
+    // Задание размера объекта памяти
+    if (ftruncate(shm_id, SHARED_MEM_SIZE) == -1) {
+        perror("ftruncate error");
+        exit(1);
     }
 
-    int *ptr = mmap(NULL, SHARED_MEM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        exit(EXIT_FAILURE);
+    int *ptr = mmap(0, SHARED_MEM_SIZE, PROT_WRITE|PROT_READ, MAP_SHARED, shm_id, 0);
+    if (ptr == (int*)-1) {
+        perror("mmap error");
+        exit(1);
     }
 
     // Seed the random number generator
@@ -57,7 +62,8 @@ int main(int argc, char *argv[]) {
 
     // Write random numbers to the shared memory
     int i = 0;
-    while (i < loop_count) {
+    *ptr = -1;
+    while (i < loop_count && *ptr != -3) {
 	if (*ptr == -3) {
             break;
         }
@@ -76,13 +82,13 @@ int main(int argc, char *argv[]) {
     // Signal the server to terminate
     *ptr = -2;
 
-    // Unmap the shared memory object
-    if (munmap(ptr, SHARED_MEM_SIZE) == -1) {
-        perror("munmap");
-        exit(EXIT_FAILURE);
+    // удаление разделяемой памяти
+    if (shm_unlink(shar_object) == -1) {
+        perror("shm_unlink error");
+        exit(1);
     }
 
-    exit(EXIT_SUCCESS);
+    exit(0);
 }
 
 ```
@@ -100,38 +106,43 @@ int main(int argc, char *argv[]) {
 
 #define SHARED_MEM_SIZE sizeof(int)
 
+const char* shar_object = "posix-shar";
+
 int main(int argc, char *argv[]) {
     int loop_count;
     if (argc < 2) {
-        printf("Usage: %s <loop_count>\n", argv[0]);
-        exit(EXIT_FAILURE);
+        printf("No arguments\n");
+        exit(1);
     } else {
         loop_count = atoi(argv[1]);
     }
 
     // Create and initialize the shared memory object
-    int shm_fd = shm_open("/my_shared_mem", O_CREAT | O_RDWR, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
-        exit(EXIT_FAILURE);
+    int shm_id = shm_open(shar_object, O_CREAT | O_RDWR, 0666);
+    if (shm_id == -1) {
+        perror("shm_open error");
+        exit(1);
+    } else {
+    	printf("Object is open: name = %s, id = 0x%x\n", shar_object, shm_id);
     }
 
-    if (ftruncate(shm_fd, SHARED_MEM_SIZE) == -1) {
-        perror("ftruncate");
-        exit(EXIT_FAILURE);
+    // Задание размера объекта памяти
+    if (ftruncate(shm_id, SHARED_MEM_SIZE) == -1) {
+        perror("ftruncate error");
+        exit(1);
     }
 
-    int *ptr = mmap(NULL, SHARED_MEM_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        exit(EXIT_FAILURE);
+    int *ptr = mmap(0, SHARED_MEM_SIZE, PROT_WRITE|PROT_READ, MAP_SHARED, shm_id, 0);
+    if (ptr == (int*)-1) {
+        perror("mmap error");
+        exit(1);
     }
 
     // Read random numbers from the shared memory and output them
     int i = 0;
     int cnt = 0;
     while (i < loop_count) {
-	if (cnt > 3) {
+	if (cnt > 10) {
 	    *ptr = -3;
             break;
         }
@@ -154,22 +165,16 @@ int main(int argc, char *argv[]) {
 
     // Wait for the client to terminate
     while (*ptr != -2) {
-	printf("#server 2");
         usleep(1000);
     }
 
-    // Unmap and remove the shared memory object
-    if (munmap(ptr, SHARED_MEM_SIZE) == -1) {
-        perror("munmap");
-        exit(EXIT_FAILURE);
+    // удаление разделяемой памяти
+    if (shm_unlink(shar_object) == -1) {
+        perror("shm_unlink error");
+        exit(1);
     }
 
-    if (shm_unlink("/my_shared_mem") == -1) {
-        perror("shm_unlink");
-        exit(EXIT_FAILURE);
-    }
-
-    exit(EXIT_SUCCESS);
+    exit(0);
 }
 
 ```
@@ -178,7 +183,7 @@ ________________________
 ### 4. Примеры вывода. <br> ###
 
 Virtual Ubuntu <br>
-![image](https://user-images.githubusercontent.com/114473740/222986764-c657bf53-2a21-4a5b-9271-51e4b0823986.png)
+![image](https://user-images.githubusercontent.com/114473740/222988436-59a4863c-711e-447f-bef7-e3d6658db6ef.png)
 
 
 

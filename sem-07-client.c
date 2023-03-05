@@ -50,14 +50,14 @@ int main(int argc, char *argv[]) {
     int i = 0;
     *ptr = -1;
     while (i < loop_count && *ptr != -3) {
-	      if (*ptr == -3) {
+	if (*ptr == -3) {
             break;
         }
         int random_num = rand() % 1000;
         while (*ptr != -1 && *ptr != -3) {
             usleep(1000);
         }
-	      if (*ptr == -3) {
+	if (*ptr == -3) {
             break;
         }
         *ptr = random_num;

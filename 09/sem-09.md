@@ -1,10 +1,10 @@
-#  ДЗ №8
+#  ДЗ №9
 ## Markdown report <br>
 
 ### 1. Ганина Ксения Андреевна (тг для вопросов: @kgnn47) <br>
 ### 2. БПИ212 <br>
 
-![image](https://user-images.githubusercontent.com/114473740/229345432-8c07ee06-f50a-4a22-ad89-65c42f6de3a6.png)
+<img width="1050" alt="image" src="https://user-images.githubusercontent.com/114473740/230677212-2196916b-a945-43da-af98-6cd5ad435205.png">
 
 ________________________
 

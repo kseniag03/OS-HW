@@ -4,10 +4,11 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <wait.h>
 
 int receiver_pid;
 
+// отправка бита приёмнику
+// чтобы приёмник различал биты, отправляем их по разным сигналам
 void send(int bit) {
     if (bit == 0) {
         kill(receiver_pid, SIGUSR1);
@@ -24,6 +25,7 @@ int main(void) {
     // установка обработчика сигнала
     (void) signal(SIGUSR1, handler_wait);
 
+    // ввод
     int sender_pid = getpid(), num;
     printf("Sender pid = %d\n\n", sender_pid);
         
@@ -38,18 +40,17 @@ int main(void) {
     if (num >= 0) {
         send(0);
     } else {
+ 	// учитываем доп бит для поддержки отрицательных чисел
         send(1);
     }
 
+    // отправляем приёмнику число по одному биту
     int n = num;
-    
     for (int i = 0; i < 32; ++i) {
-        //send(n & 1);
-printf("cur n = %d, cur bit = %d\n", n, n & 1);
+        //printf("cur n = %d, cur bit = %d\n", n, n & 1);
 	send(n & 1);
 	n >>= 1;
-        //pause();
-sleep(10);
+        sleep(10);
     }
     
     printf("\nResult = %d\n", num);

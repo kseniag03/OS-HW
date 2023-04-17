@@ -4,11 +4,11 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <wait.h>
 
-int sender_pid;
-int received_bit = -1;
+int received_bit;
 
+// в зависимости от полученного сигнала
+// приёмник присваивает соответствующий бит текущему для вывода
 void handler(int nsig) {
     if (nsig == SIGUSR1) {
         received_bit = 0;
@@ -22,7 +22,7 @@ int main(void) {
     (void) signal(SIGUSR1, handler);
     (void) signal(SIGUSR2, handler);
 
-    int receiver_pid = getpid();
+    int sender_pid, receiver_pid = getpid();
     printf("Receiver pid = %d\n\n", receiver_pid);
 
     printf("Enter sender pid: ");
@@ -30,18 +30,19 @@ int main(void) {
 
     printf("\nInput sender pid: %d\n", sender_pid);
 
-    // notify sender
+    // уведомить передатчик для начала передачи битов
     kill(sender_pid, SIGUSR1);
 
+    // получение двоичной записи числа
     int bits[32];
     for (int i = 0; i < 32; ++i) {
-        //pause();
-sleep(10);
+        sleep(10);
 	bits[i] = received_bit;
 	printf("%d", received_bit);
 	kill(sender_pid, SIGUSR1);
     }
 
+    // получение десятичной формы записи числа
     int num = 0;
     for (int i = 0; i < 32; ++i) {
         num |= bits[i] << i;

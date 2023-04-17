@@ -23,7 +23,7 @@ void handler_wait(int nsig) {
 int main(void) {
     // установка обработчика сигнала
     (void) signal(SIGUSR1, handler_wait);
-    
+
     int sender_pid = getpid(), num;
     printf("Sender pid = %d\n\n", sender_pid);
         
@@ -44,9 +44,12 @@ int main(void) {
     int n = num;
     
     for (int i = 0; i < 32; ++i) {
-        send(n & 1);
+        //send(n & 1);
+printf("cur n = %d, cur bit = %d\n", n, n & 1);
+	send(n & 1);
 	n >>= 1;
-        pause();
+        //pause();
+sleep(10);
     }
     
     printf("\nResult = %d\n", num);

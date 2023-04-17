@@ -12,7 +12,7 @@ int received_bit = -1;
 void handler(int nsig) {
     if (nsig == SIGUSR1) {
         received_bit = 0;
-    } else if (nsig == SIGUSR1) {
+    } else if (nsig == SIGUSR2) {
         received_bit = 1;
     }
 }
@@ -21,7 +21,7 @@ int main(void) {
     // установка обработчиков сигнала
     (void) signal(SIGUSR1, handler);
     (void) signal(SIGUSR2, handler);
-    
+
     int receiver_pid = getpid();
     printf("Receiver pid = %d\n\n", receiver_pid);
 
@@ -35,7 +35,8 @@ int main(void) {
 
     int bits[32];
     for (int i = 0; i < 32; ++i) {
-        pause();
+        //pause();
+sleep(10);
 	bits[i] = received_bit;
 	printf("%d", received_bit);
 	kill(sender_pid, SIGUSR1);
